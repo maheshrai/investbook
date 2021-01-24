@@ -1,0 +1,15 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-investbook-dev-84039-authRole",
+      "UnauthRoleArn": "arn:aws:iam::021233944520:role/amplify-investbook-dev-84039-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::021233944520:role/amplify-investbook-dev-84039-authRole",
+      "Region": "us-west-2",
+      "DeploymentBucketName": "amplify-investbook-dev-84039-deployment",
+      "UnauthRoleName": "amplify-investbook-dev-84039-unauthRole",
+      "StackName": "amplify-investbook-dev-84039",
+      "StackId": "arn:aws:cloudformation:us-west-2:021233944520:stack/amplify-investbook-dev-84039/59fb88f0-5d91-11eb-a732-06b1b80a4e11",
+      "AmplifyAppId": "dlehrl0maka3y"
+    }
+  }
+}

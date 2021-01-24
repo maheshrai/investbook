@@ -1,0 +1,41 @@
+type Transaction
+  @model
+  @auth(rules: [{ allow: public }])
+  @key(name: "byPortfolio", fields: ["portfolioID"]) {
+  id: ID!
+  symbol: String
+  type: TransactionType
+  quantity: Float
+  amount: Float
+  when: AWSDateTime
+  portfolioID: ID!
+}
+
+type Holding
+  @model
+  @auth(rules: [{ allow: public }])
+  @key(name: "byPortfolio", fields: ["portfolioID"]) {
+  id: ID!
+  symbol: String
+  quantity: Float
+  cost: Float
+  portfolioID: ID!
+}
+
+type Portfolio @model @auth(rules: [{ allow: public }]) {
+  id: ID!
+  username: String
+  name: String
+  description: String
+  value: Float
+  investedAmount: Float
+  Holdings: [Holding] @connection(keyName: "byPortfolio", fields: ["id"])
+  Transactions: [Transaction]
+    @connection(keyName: "byPortfolio", fields: ["id"])
+}
+
+enum TransactionType {
+  BUY
+  SELL
+  DIVIDEND
+}

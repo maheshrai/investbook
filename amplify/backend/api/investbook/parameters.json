@@ -1,0 +1,5 @@
+{
+  "AppSyncApiName": "investbook",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false
+}
