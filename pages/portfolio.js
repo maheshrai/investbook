@@ -1,4 +1,16 @@
-export default function Benchmark() {
+import { withAuthenticator, AmplifySignOut } from "@aws-amplify/ui-react";
+import { Auth } from "aws-amplify";
+import { useState, useEffect } from "react";
+function Portfolio() {
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    checkUser();
+  }, []);
+  async function checkUser() {
+    const user = await Auth.currentAuthenticatedUser();
+    setUser(user);
+  }
+  if (!user) return null;
   return (
     <div className="flex flex-col">
       <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -11,24 +23,24 @@ export default function Benchmark() {
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Index
+                    Ticker
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 <tr>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">S&P 500</div>
+                    <div className="text-sm text-gray-900">AAPL</div>
                   </td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">Dow Jones</div>
+                    <div className="text-sm text-gray-900">MSFT</div>
                   </td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">Russell 1000</div>
+                    <div className="text-sm text-gray-900">NFLX</div>
                   </td>
                 </tr>
               </tbody>
@@ -39,3 +51,5 @@ export default function Benchmark() {
     </div>
   );
 }
+
+export default withAuthenticator(Portfolio);
