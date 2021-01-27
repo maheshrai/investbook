@@ -18,14 +18,6 @@ function MyApp({ Component, pageProps }) {
     });
   }, []);
 
-  async function signOut() {
-    try {
-      await Auth.signOut();
-    } catch (error) {
-      console.log("error signing out: ", error);
-    }
-  }
-
   return (
     <div>
       <nav className="bg-gray-800">
@@ -170,9 +162,12 @@ function MyApp({ Component, pageProps }) {
     -->*/}
         <div className={isMenuOpen ? "md:hidden" : "hidden md:hidden"}>
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link href="/benchmarks">
+            <Link href="/">
               <span
-                onClick={() => setTab("home")}
+                onClick={() => {
+                  setTab("home");
+                  setIsMenuOpen(false);
+                }}
                 className={
                   tab === "home"
                     ? "bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium"
@@ -183,9 +178,12 @@ function MyApp({ Component, pageProps }) {
               </span>
             </Link>
 
-            <Link href="/benchmarks">
+            <Link href="/portfolio">
               <span
-                onClick={() => setTab("portfolio")}
+                onClick={() => {
+                  setTab("portfolio");
+                  setIsMenuOpen(false);
+                }}
                 className={
                   tab === "portfolio"
                     ? "bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium"
@@ -197,7 +195,10 @@ function MyApp({ Component, pageProps }) {
             </Link>
             <Link href="/benchmarks">
               <span
-                onClick={() => setTab("benchmarks")}
+                onClick={() => {
+                  setTab("benchmarks");
+                  setIsMenuOpen(false);
+                }}
                 className={
                   tab === "benchmarks"
                     ? "bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium"
@@ -208,11 +209,14 @@ function MyApp({ Component, pageProps }) {
               </span>
             </Link>
           </div>
-          <div className="pt-4 pb-3 border-t border-gray-700">
+          <div className="px-2 pt-4 pb-3 border-t border-gray-700">
             {authState !== AuthState.SignedIn && (
               <Link href="/profile">
                 <button
-                  onClick={() => setTab("profile")}
+                  onClick={() => {
+                    setTab("profile");
+                    setIsMenuOpen(false);
+                  }}
                   className="py-2 px-4 font-semibold rounded-lg shadow-md text-white bg-green-600 hover:bg-green-900"
                 >
                   Sign In
@@ -222,7 +226,10 @@ function MyApp({ Component, pageProps }) {
             {authState === AuthState.SignedIn && user && (
               <Link href="/profile">
                 <span
-                  onClick={() => setTab("profile")}
+                  onClick={() => {
+                    setTab("profile");
+                    setIsMenuOpen(false);
+                  }}
                   className={
                     tab === "profile"
                       ? "bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium"
