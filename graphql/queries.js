@@ -9,7 +9,7 @@ export const getTransaction = /* GraphQL */ `
       type
       quantity
       amount
-      when
+      username
       portfolioID
       createdAt
       updatedAt
@@ -29,7 +29,7 @@ export const listTransactions = /* GraphQL */ `
         type
         quantity
         amount
-        when
+        username
         portfolioID
         createdAt
         updatedAt
@@ -45,6 +45,7 @@ export const getHolding = /* GraphQL */ `
       symbol
       quantity
       cost
+      username
       portfolioID
       createdAt
       updatedAt
@@ -63,6 +64,7 @@ export const listHoldings = /* GraphQL */ `
         symbol
         quantity
         cost
+        username
         portfolioID
         createdAt
         updatedAt
@@ -78,20 +80,9 @@ export const getPortfolio = /* GraphQL */ `
       username
       name
       description
-      value
-      investedAmount
-      Holdings {
-        items {
-          id
-          symbol
-          quantity
-          cost
-          portfolioID
-          createdAt
-          updatedAt
-        }
-        nextToken
-      }
+      availableFunds
+      createdAt
+      updatedAt
       Transactions {
         items {
           id
@@ -99,15 +90,26 @@ export const getPortfolio = /* GraphQL */ `
           type
           quantity
           amount
-          when
+          username
           portfolioID
           createdAt
           updatedAt
         }
         nextToken
       }
-      createdAt
-      updatedAt
+      Holdings {
+        items {
+          id
+          symbol
+          quantity
+          cost
+          username
+          portfolioID
+          createdAt
+          updatedAt
+        }
+        nextToken
+      }
     }
   }
 `;
@@ -123,16 +125,49 @@ export const listPortfolios = /* GraphQL */ `
         username
         name
         description
-        value
-        investedAmount
-        Holdings {
-          nextToken
-        }
+        availableFunds
+        createdAt
+        updatedAt
         Transactions {
           nextToken
         }
+        Holdings {
+          nextToken
+        }
+      }
+      nextToken
+    }
+  }
+`;
+export const portfoliosByUsername = /* GraphQL */ `
+  query PortfoliosByUsername(
+    $username: String
+    $sortDirection: ModelSortDirection
+    $filter: ModelPortfolioFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    portfoliosByUsername(
+      username: $username
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        username
+        name
+        description
+        availableFunds
         createdAt
         updatedAt
+        Transactions {
+          nextToken
+        }
+        Holdings {
+          nextToken
+        }
       }
       nextToken
     }

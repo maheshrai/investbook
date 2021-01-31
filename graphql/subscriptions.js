@@ -2,14 +2,14 @@
 // this is an auto generated file. This will be overwritten
 
 export const onCreateTransaction = /* GraphQL */ `
-  subscription OnCreateTransaction {
-    onCreateTransaction {
+  subscription OnCreateTransaction($username: String) {
+    onCreateTransaction(username: $username) {
       id
       symbol
       type
       quantity
       amount
-      when
+      username
       portfolioID
       createdAt
       updatedAt
@@ -17,14 +17,14 @@ export const onCreateTransaction = /* GraphQL */ `
   }
 `;
 export const onUpdateTransaction = /* GraphQL */ `
-  subscription OnUpdateTransaction {
-    onUpdateTransaction {
+  subscription OnUpdateTransaction($username: String) {
+    onUpdateTransaction(username: $username) {
       id
       symbol
       type
       quantity
       amount
-      when
+      username
       portfolioID
       createdAt
       updatedAt
@@ -32,14 +32,14 @@ export const onUpdateTransaction = /* GraphQL */ `
   }
 `;
 export const onDeleteTransaction = /* GraphQL */ `
-  subscription OnDeleteTransaction {
-    onDeleteTransaction {
+  subscription OnDeleteTransaction($username: String) {
+    onDeleteTransaction(username: $username) {
       id
       symbol
       type
       quantity
       amount
-      when
+      username
       portfolioID
       createdAt
       updatedAt
@@ -47,12 +47,13 @@ export const onDeleteTransaction = /* GraphQL */ `
   }
 `;
 export const onCreateHolding = /* GraphQL */ `
-  subscription OnCreateHolding {
-    onCreateHolding {
+  subscription OnCreateHolding($username: String) {
+    onCreateHolding(username: $username) {
       id
       symbol
       quantity
       cost
+      username
       portfolioID
       createdAt
       updatedAt
@@ -60,12 +61,13 @@ export const onCreateHolding = /* GraphQL */ `
   }
 `;
 export const onUpdateHolding = /* GraphQL */ `
-  subscription OnUpdateHolding {
-    onUpdateHolding {
+  subscription OnUpdateHolding($username: String) {
+    onUpdateHolding(username: $username) {
       id
       symbol
       quantity
       cost
+      username
       portfolioID
       createdAt
       updatedAt
@@ -73,12 +75,13 @@ export const onUpdateHolding = /* GraphQL */ `
   }
 `;
 export const onDeleteHolding = /* GraphQL */ `
-  subscription OnDeleteHolding {
-    onDeleteHolding {
+  subscription OnDeleteHolding($username: String) {
+    onDeleteHolding(username: $username) {
       id
       symbol
       quantity
       cost
+      username
       portfolioID
       createdAt
       updatedAt
@@ -86,26 +89,15 @@ export const onDeleteHolding = /* GraphQL */ `
   }
 `;
 export const onCreatePortfolio = /* GraphQL */ `
-  subscription OnCreatePortfolio {
-    onCreatePortfolio {
+  subscription OnCreatePortfolio($username: String) {
+    onCreatePortfolio(username: $username) {
       id
       username
       name
       description
-      value
-      investedAmount
-      Holdings {
-        items {
-          id
-          symbol
-          quantity
-          cost
-          portfolioID
-          createdAt
-          updatedAt
-        }
-        nextToken
-      }
+      availableFunds
+      createdAt
+      updatedAt
       Transactions {
         items {
           id
@@ -113,39 +105,39 @@ export const onCreatePortfolio = /* GraphQL */ `
           type
           quantity
           amount
-          when
+          username
           portfolioID
           createdAt
           updatedAt
         }
         nextToken
       }
-      createdAt
-      updatedAt
+      Holdings {
+        items {
+          id
+          symbol
+          quantity
+          cost
+          username
+          portfolioID
+          createdAt
+          updatedAt
+        }
+        nextToken
+      }
     }
   }
 `;
 export const onUpdatePortfolio = /* GraphQL */ `
-  subscription OnUpdatePortfolio {
-    onUpdatePortfolio {
+  subscription OnUpdatePortfolio($username: String) {
+    onUpdatePortfolio(username: $username) {
       id
       username
       name
       description
-      value
-      investedAmount
-      Holdings {
-        items {
-          id
-          symbol
-          quantity
-          cost
-          portfolioID
-          createdAt
-          updatedAt
-        }
-        nextToken
-      }
+      availableFunds
+      createdAt
+      updatedAt
       Transactions {
         items {
           id
@@ -153,39 +145,39 @@ export const onUpdatePortfolio = /* GraphQL */ `
           type
           quantity
           amount
-          when
+          username
           portfolioID
           createdAt
           updatedAt
         }
         nextToken
       }
-      createdAt
-      updatedAt
+      Holdings {
+        items {
+          id
+          symbol
+          quantity
+          cost
+          username
+          portfolioID
+          createdAt
+          updatedAt
+        }
+        nextToken
+      }
     }
   }
 `;
 export const onDeletePortfolio = /* GraphQL */ `
-  subscription OnDeletePortfolio {
-    onDeletePortfolio {
+  subscription OnDeletePortfolio($username: String) {
+    onDeletePortfolio(username: $username) {
       id
       username
       name
       description
-      value
-      investedAmount
-      Holdings {
-        items {
-          id
-          symbol
-          quantity
-          cost
-          portfolioID
-          createdAt
-          updatedAt
-        }
-        nextToken
-      }
+      availableFunds
+      createdAt
+      updatedAt
       Transactions {
         items {
           id
@@ -193,15 +185,26 @@ export const onDeletePortfolio = /* GraphQL */ `
           type
           quantity
           amount
-          when
+          username
           portfolioID
           createdAt
           updatedAt
         }
         nextToken
       }
-      createdAt
-      updatedAt
+      Holdings {
+        items {
+          id
+          symbol
+          quantity
+          cost
+          username
+          portfolioID
+          createdAt
+          updatedAt
+        }
+        nextToken
+      }
     }
   }
 `;

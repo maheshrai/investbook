@@ -12,7 +12,7 @@ export const createTransaction = /* GraphQL */ `
       type
       quantity
       amount
-      when
+      username
       portfolioID
       createdAt
       updatedAt
@@ -30,7 +30,7 @@ export const updateTransaction = /* GraphQL */ `
       type
       quantity
       amount
-      when
+      username
       portfolioID
       createdAt
       updatedAt
@@ -48,7 +48,7 @@ export const deleteTransaction = /* GraphQL */ `
       type
       quantity
       amount
-      when
+      username
       portfolioID
       createdAt
       updatedAt
@@ -65,6 +65,7 @@ export const createHolding = /* GraphQL */ `
       symbol
       quantity
       cost
+      username
       portfolioID
       createdAt
       updatedAt
@@ -81,6 +82,7 @@ export const updateHolding = /* GraphQL */ `
       symbol
       quantity
       cost
+      username
       portfolioID
       createdAt
       updatedAt
@@ -97,6 +99,7 @@ export const deleteHolding = /* GraphQL */ `
       symbol
       quantity
       cost
+      username
       portfolioID
       createdAt
       updatedAt
@@ -113,20 +116,9 @@ export const createPortfolio = /* GraphQL */ `
       username
       name
       description
-      value
-      investedAmount
-      Holdings {
-        items {
-          id
-          symbol
-          quantity
-          cost
-          portfolioID
-          createdAt
-          updatedAt
-        }
-        nextToken
-      }
+      availableFunds
+      createdAt
+      updatedAt
       Transactions {
         items {
           id
@@ -134,15 +126,26 @@ export const createPortfolio = /* GraphQL */ `
           type
           quantity
           amount
-          when
+          username
           portfolioID
           createdAt
           updatedAt
         }
         nextToken
       }
-      createdAt
-      updatedAt
+      Holdings {
+        items {
+          id
+          symbol
+          quantity
+          cost
+          username
+          portfolioID
+          createdAt
+          updatedAt
+        }
+        nextToken
+      }
     }
   }
 `;
@@ -156,20 +159,9 @@ export const updatePortfolio = /* GraphQL */ `
       username
       name
       description
-      value
-      investedAmount
-      Holdings {
-        items {
-          id
-          symbol
-          quantity
-          cost
-          portfolioID
-          createdAt
-          updatedAt
-        }
-        nextToken
-      }
+      availableFunds
+      createdAt
+      updatedAt
       Transactions {
         items {
           id
@@ -177,15 +169,26 @@ export const updatePortfolio = /* GraphQL */ `
           type
           quantity
           amount
-          when
+          username
           portfolioID
           createdAt
           updatedAt
         }
         nextToken
       }
-      createdAt
-      updatedAt
+      Holdings {
+        items {
+          id
+          symbol
+          quantity
+          cost
+          username
+          portfolioID
+          createdAt
+          updatedAt
+        }
+        nextToken
+      }
     }
   }
 `;
@@ -199,20 +202,9 @@ export const deletePortfolio = /* GraphQL */ `
       username
       name
       description
-      value
-      investedAmount
-      Holdings {
-        items {
-          id
-          symbol
-          quantity
-          cost
-          portfolioID
-          createdAt
-          updatedAt
-        }
-        nextToken
-      }
+      availableFunds
+      createdAt
+      updatedAt
       Transactions {
         items {
           id
@@ -220,15 +212,26 @@ export const deletePortfolio = /* GraphQL */ `
           type
           quantity
           amount
-          when
+          username
           portfolioID
           createdAt
           updatedAt
         }
         nextToken
       }
-      createdAt
-      updatedAt
+      Holdings {
+        items {
+          id
+          symbol
+          quantity
+          cost
+          username
+          portfolioID
+          createdAt
+          updatedAt
+        }
+        nextToken
+      }
     }
   }
 `;
