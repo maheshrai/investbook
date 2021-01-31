@@ -7,6 +7,7 @@ import {
   createHolding,
   createPortfolio,
   updatePortfolio,
+  updateHolding,
 } from "../graphql/mutations";
 function Portfolio() {
   // USD currency formatter
@@ -28,7 +29,7 @@ function Portfolio() {
 
   const handleTransactionChange = (event) => setTransaction(event.target.value);
   const handleSymbolChange = (event) => {
-    setSymbol(event.target.value);
+    setSymbol(event.target.value.toUpperCase());
     updatePrice(event.target.value);
   };
   const handleQuantityChange = (event) => setQuantity(event.target.value);
@@ -133,6 +134,8 @@ function Portfolio() {
 
   // Validate that the transaction is valid
   function isTransactionValid() {
+    if (isNaN(price) || isNaN(quantity) || price === 0 || quantity === 0)
+      return false;
     try {
       if (transaction === "BUY") {
         let amount = quantity * parseFloat(price);
@@ -163,16 +166,35 @@ function Portfolio() {
       cost: cost,
       portfolioID: portfolio.id,
     };
+    let holding = holdings.find((h) => h.symbol === symbol);
+    if (holding) {
+      // update the holding
+      const holdingDetails = {
+        id: holding.id,
+        quantity:
+          transaction === "BUY"
+            ? parseFloat(holding.quantity) + parseFloat(quantity)
+            : parseFloat(holding.quantity) - parseFloat(quantity),
+        cost: transaction === "BUY" ? holding.cost + cost : holding.cost - cost,
+      };
+      await API.graphql({
+        query: updateHolding,
+        variables: { input: holdingDetails },
+        authMode: "AMAZON_COGNITO_USER_POOLS",
+      });
+    } else {
+      await API.graphql({
+        query: createHolding,
+        variables: { input: h },
+        authMode: "AMAZON_COGNITO_USER_POOLS",
+      });
+    }
     await API.graphql({
       query: createTransaction,
       variables: { input: t },
       authMode: "AMAZON_COGNITO_USER_POOLS",
     });
-    await API.graphql({
-      query: createHolding,
-      variables: { input: h },
-      authMode: "AMAZON_COGNITO_USER_POOLS",
-    });
+
     // update the portfolio's available funds
     const portfolioDetails = {
       id: portfolio.id,
@@ -374,11 +396,9 @@ function Portfolio() {
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             placeholder="SYM"
           />
-          {!isNaN(price) && (
-            <div className="bg-indigo-500 px-6 py-3 text-white text-center font-extrabold rounded-full">
-              {price}
-            </div>
-          )}
+          <div className="bg-indigo-500 px-6 py-3 text-white text-center font-extrabold rounded-full">
+            {isNaN(price) || price === 0 ? "" : price}
+          </div>
           <input
             type="number"
             onChange={handleQuantityChange}
@@ -386,11 +406,11 @@ function Portfolio() {
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             placeholder="QTY"
           />
-          {!isNaN(price) && !isNaN(quantity) && (
-            <div className="bg-indigo-500 px-6 py-3 text-white text-center font-extrabold rounded-full">
-              {price * quantity}
-            </div>
-          )}
+          <div className="bg-indigo-500 px-6 py-3 text-white text-center font-extrabold rounded-full">
+            {isNaN(price) || isNaN(quantity) || price === 0 || quantity === 0
+              ? ""
+              : price * quantity}
+          </div>
           <button
             onClick={async () => updateMyPortfolio()}
             disabled={!isTransactionValid()}
