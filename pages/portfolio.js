@@ -1,4 +1,4 @@
-import { withAuthenticator, AmplifySignOut } from "@aws-amplify/ui-react";
+import { withAuthenticator } from "@aws-amplify/ui-react";
 import { API, Auth } from "aws-amplify";
 import { useState, useEffect } from "react";
 import { portfoliosByUsername, listHoldings } from "../graphql/queries";
@@ -8,7 +8,6 @@ import {
   createPortfolio,
   updatePortfolio,
 } from "../graphql/mutations";
-import { transform } from "framer-motion";
 function Portfolio() {
   // USD currency formatter
   const currencyFormatter = new Intl.NumberFormat("en-US", {
@@ -20,7 +19,7 @@ function Portfolio() {
   const [portfolio, setPortfolio] = useState(null);
   const [holdings, setHoldings] = useState([]);
   const [exists, setExists] = useState(true);
-  const [trasaction, setTransaction] = useState("BUY");
+  const [transaction, setTransaction] = useState("BUY");
   const [quantity, setQuantity] = useState(0);
   const [price, setPrice] = useState(0);
   const [symbol, setSymbol] = useState("");
@@ -100,7 +99,6 @@ function Portfolio() {
           arr[i]["gainPct"] = gainPct;
         }
         tmpPortfolio["value"] = tmpPortfolio.availableFunds + holdingsValue;
-        alert(tmpPortfolio.value);
         setPortfolio(tmpPortfolio);
         setHoldings(arr);
       } else {
@@ -136,10 +134,10 @@ function Portfolio() {
   // Validate that the transaction is valid
   function isTransactionValid() {
     try {
-      if (trasaction === "BUY") {
+      if (transaction === "BUY") {
         let amount = quantity * parseFloat(price);
         if (amount <= portfolio.availableFunds) return true;
-      } else if (trasaction === "SELL") {
+      } else if (transaction === "SELL") {
         let holding = holdings.find((h) => h.symbol === symbol);
         if (holding && holding.quantity >= quantity) return true;
       }
@@ -153,7 +151,7 @@ function Portfolio() {
     }
     const cost = quantity * parseFloat(price);
     const t = {
-      type: trasaction,
+      type: transaction,
       symbol: symbol,
       quantity: quantity,
       amount: cost,
@@ -402,7 +400,7 @@ function Portfolio() {
                 : "py-2 px-4 font-semibold rounded-lg shadow-md text-white bg-green-600 hover:bg-green-900 opacity-50"
             }
           >
-            {trasaction === "BUY" ? "Buy" : "Sell"}
+            {transaction === "BUY" ? "Buy" : "Sell"}
           </button>
         </div>
       </div>
