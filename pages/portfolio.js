@@ -8,12 +8,19 @@ import {
   createPortfolio,
   updatePortfolio,
   updateHolding,
+  deleteHolding,
 } from "../graphql/mutations";
 function Portfolio() {
   // USD currency formatter
   const currencyFormatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
+  });
+
+  const percentageFormatter = new Intl.NumberFormat("en-US", {
+    style: "percent",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   });
 
   const [user, setUser] = useState(null);
@@ -50,7 +57,8 @@ function Portfolio() {
   }
 
   async function updatePrice(symbol) {
-    const p = await fetchQuote(symbol);
+    let p = await fetchQuote(symbol);
+    if (p && !isNaN(p)) p = p.toFixed(2);
     setPrice(p);
   }
 
@@ -89,13 +97,15 @@ function Portfolio() {
       if (holdingsData.data.listHoldings.items.length > 0) {
         let arr = holdingsData.data.listHoldings.items;
         for (var i = 0; i < arr.length; i++) {
-          const p = await fetchQuote(arr[i].symbol);
+          let p = await fetchQuote(arr[i].symbol);
+          if (p && !isNaN(p)) p = p.toFixed(2);
+          else continue;
           arr[i]["price"] = p;
           const val = p * arr[i].quantity;
           holdingsValue += val;
           arr[i]["value"] = val;
           let gain = val - arr[i].cost;
-          let gainPct = (gain / arr[i].cost) * 100;
+          let gainPct = gain / arr[i].cost;
           arr[i]["gain"] = gain;
           arr[i]["gainPct"] = gainPct;
         }
@@ -136,12 +146,14 @@ function Portfolio() {
   function isTransactionValid() {
     if (isNaN(price) || isNaN(quantity) || price === 0 || quantity === 0)
       return false;
+    let holding = holdings.find((h) => h.symbol === symbol);
     try {
       if (transaction === "BUY") {
         let amount = quantity * parseFloat(price);
+        // Allow only max of 8 stocks in portfolio
+        if (!holding && holdings.length === 8) return false;
         if (amount <= portfolio.availableFunds) return true;
       } else if (transaction === "SELL") {
-        let holding = holdings.find((h) => h.symbol === symbol);
         if (holding && holding.quantity >= quantity) return true;
       }
     } catch (err) {}
@@ -152,36 +164,49 @@ function Portfolio() {
     if (!isTransactionValid()) {
       return;
     }
-    const cost = quantity * parseFloat(price);
+    const qty = parseFloat(quantity).toFixed(2);
+    const cost = (qty * price).toFixed(2);
     const t = {
       type: transaction,
       symbol: symbol,
-      quantity: quantity,
+      quantity: qty,
       amount: cost,
       portfolioID: portfolio.id,
     };
     const h = {
       symbol: symbol,
-      quantity: quantity,
+      quantity: qty,
       cost: cost,
       portfolioID: portfolio.id,
     };
     let holding = holdings.find((h) => h.symbol === symbol);
     if (holding) {
       // update the holding
-      const holdingDetails = {
-        id: holding.id,
-        quantity:
-          transaction === "BUY"
-            ? parseFloat(holding.quantity) + parseFloat(quantity)
-            : parseFloat(holding.quantity) - parseFloat(quantity),
-        cost: transaction === "BUY" ? holding.cost + cost : holding.cost - cost,
-      };
-      await API.graphql({
-        query: updateHolding,
-        variables: { input: holdingDetails },
-        authMode: "AMAZON_COGNITO_USER_POOLS",
-      });
+      let hqty = parseFloat(holding.quantity);
+      if (hqty === qty && transaction === "SELL") {
+        // delete the holding
+        const holdingToDelete = {
+          id: holding.id,
+        };
+        await API.graphql({
+          query: deleteHolding,
+          variables: { input: holdingToDelete },
+          authMode: "AMAZON_COGNITO_USER_POOLS",
+        });
+      } else {
+        // update the holding
+        const holdingDetails = {
+          id: holding.id,
+          quantity: transaction === "BUY" ? hqty + qty : hqty - qty,
+          cost:
+            transaction === "BUY" ? holding.cost + cost : holding.cost - cost,
+        };
+        await API.graphql({
+          query: updateHolding,
+          variables: { input: holdingDetails },
+          authMode: "AMAZON_COGNITO_USER_POOLS",
+        });
+      }
     } else {
       await API.graphql({
         query: createHolding,
@@ -248,22 +273,26 @@ function Portfolio() {
         )}
         {portfolio && (
           <p className="pb-4 text-md font-semibold">
-            <span className="text-black">Portfolio Value: </span>
-            <span
-              className={
-                portfolio?.value >= 50000 ? "text-green-500" : "text-red-500"
-              }
-            >
-              {currencyFormatter.format(portfolio?.value)}
-            </span>
-            <span className="pl-4 text-black">Funds available: </span>
-            <span
-              className={
-                portfolio?.value >= 50000 ? "text-green-500" : "text-red-500"
-              }
-            >
-              {currencyFormatter.format(portfolio?.availableFunds)}
-            </span>
+            <div>
+              <span className="text-black">Portfolio Value ($50,000): </span>
+              <span
+                className={
+                  portfolio?.value >= 50000 ? "text-green-500" : "text-red-500"
+                }
+              >
+                {currencyFormatter.format(portfolio?.value)}
+              </span>
+            </div>
+            <div>
+              <span className="text-black">Funds available to invest: </span>
+              <span
+                className={
+                  portfolio?.value >= 50000 ? "text-green-500" : "text-red-500"
+                }
+              >
+                {currencyFormatter.format(portfolio?.availableFunds)}
+              </span>
+            </div>
           </p>
         )}
         {holdings?.length > 0 && (
@@ -307,7 +336,7 @@ function Portfolio() {
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
-                        Gain($)
+                        Gain
                       </th>
                       <th
                         scope="col"
@@ -342,7 +371,7 @@ function Portfolio() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {holding?.value}
+                            {currencyFormatter.format(holding?.value)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -364,7 +393,7 @@ function Portfolio() {
                                 : "text-sm text-green-700"
                             }
                           >
-                            {holding?.gainPct}
+                            {percentageFormatter.format(holding?.gainPct)}
                           </div>
                         </td>
                       </tr>
@@ -397,18 +426,19 @@ function Portfolio() {
             placeholder="SYM"
           />
           <div className="bg-indigo-500 px-6 py-3 text-white text-center font-extrabold rounded-full">
-            {isNaN(price) || price === 0 ? "" : price}
+            {isNaN(price) || price === 0 ? "Price" : price}
           </div>
           <input
             type="number"
             onChange={handleQuantityChange}
             min="0"
+            step="1"
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             placeholder="QTY"
           />
           <div className="bg-indigo-500 px-6 py-3 text-white text-center font-extrabold rounded-full">
             {isNaN(price) || isNaN(quantity) || price === 0 || quantity === 0
-              ? ""
+              ? "Cost"
               : price * quantity}
           </div>
           <button
