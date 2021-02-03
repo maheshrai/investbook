@@ -71,7 +71,7 @@ function Portfolio() {
           process.env.NEXT_PUBLIC_IEX_CLOUD_API_KEY
       );
       const quote = await res.json();
-      return quote?.delayedPrice;
+      return quote?.latestPrice;
     } catch (ex) {}
     return NaN;
   }

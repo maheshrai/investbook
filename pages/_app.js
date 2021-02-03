@@ -56,16 +56,16 @@ function MyApp({ Component, pageProps }) {
                       My Portfolio
                     </span>
                   </Link>
-                  <Link href="/benchmarks">
+                  <Link href="/stocks">
                     <span
-                      onClick={() => setTab("benchmarks")}
+                      onClick={() => setTab("stocks")}
                       className={
-                        tab === "benchmarks"
+                        tab === "stocks"
                           ? "bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium"
                           : "text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                       }
                     >
-                      Benchmarks
+                      Stocks
                     </span>
                   </Link>
                 </div>
@@ -193,19 +193,19 @@ function MyApp({ Component, pageProps }) {
                 My Portfolio
               </span>
             </Link>
-            <Link href="/benchmarks">
+            <Link href="/stocks">
               <span
                 onClick={() => {
-                  setTab("benchmarks");
+                  setTab("stocks");
                   setIsMenuOpen(false);
                 }}
                 className={
-                  tab === "benchmarks"
+                  tab === "stocks"
                     ? "bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium"
                     : "text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
                 }
               >
-                Benchmarks
+                Stocks
               </span>
             </Link>
           </div>
