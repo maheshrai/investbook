@@ -43,6 +43,7 @@ export const getHolding = /* GraphQL */ `
     getHolding(id: $id) {
       id
       symbol
+      companyName
       quantity
       cost
       username
@@ -62,6 +63,37 @@ export const listHoldings = /* GraphQL */ `
       items {
         id
         symbol
+        companyName
+        quantity
+        cost
+        username
+        portfolioID
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;
+export const holdingsBySymbol = /* GraphQL */ `
+  query HoldingsBySymbol(
+    $symbol: String
+    $sortDirection: ModelSortDirection
+    $filter: ModelHoldingFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    holdingsBySymbol(
+      symbol: $symbol
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        symbol
+        companyName
         quantity
         cost
         username
@@ -101,6 +133,7 @@ export const getPortfolio = /* GraphQL */ `
         items {
           id
           symbol
+          companyName
           quantity
           cost
           username

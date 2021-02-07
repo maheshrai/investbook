@@ -24,9 +24,11 @@ type Holding
       { allow: public, operations: [read] }
     ]
   )
-  @key(name: "byPortfolio", fields: ["portfolioID"]) {
+  @key(name: "byPortfolio", fields: ["portfolioID"])
+  @key(name: "bySymbol", fields: ["symbol"], queryField: "holdingsBySymbol") {
   id: ID!
   symbol: String
+  companyName: String
   quantity: Float
   cost: Float
   username: String

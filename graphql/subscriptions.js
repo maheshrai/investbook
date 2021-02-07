@@ -51,6 +51,7 @@ export const onCreateHolding = /* GraphQL */ `
     onCreateHolding(username: $username) {
       id
       symbol
+      companyName
       quantity
       cost
       username
@@ -65,6 +66,7 @@ export const onUpdateHolding = /* GraphQL */ `
     onUpdateHolding(username: $username) {
       id
       symbol
+      companyName
       quantity
       cost
       username
@@ -79,6 +81,7 @@ export const onDeleteHolding = /* GraphQL */ `
     onDeleteHolding(username: $username) {
       id
       symbol
+      companyName
       quantity
       cost
       username
@@ -116,6 +119,7 @@ export const onCreatePortfolio = /* GraphQL */ `
         items {
           id
           symbol
+          companyName
           quantity
           cost
           username
@@ -156,6 +160,7 @@ export const onUpdatePortfolio = /* GraphQL */ `
         items {
           id
           symbol
+          companyName
           quantity
           cost
           username
@@ -196,6 +201,7 @@ export const onDeletePortfolio = /* GraphQL */ `
         items {
           id
           symbol
+          companyName
           quantity
           cost
           username
