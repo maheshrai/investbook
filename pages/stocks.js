@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getPortfolio, holdingsBySymbol } from "../graphql/queries";
+import Link from "next/link";
 import { API } from "aws-amplify";
 export default function Stocks() {
   const mktCapFormat = Intl.NumberFormat("en", { notation: "compact" });
@@ -57,8 +58,8 @@ export default function Stocks() {
           }
         }
 
-        portfolio["performance"] = percentageFormatter.format(
-          (+portfolioValue - 50000) / 50000
+        portfolio["performance"] = ((+portfolioValue - 50000) / 50000).toFixed(
+          4
         );
         parr.push(portfolio);
       }
@@ -215,13 +216,20 @@ export default function Stocks() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div
                           className={
-                            +p.performance?.gain < 0
+                            +p.performance < 0
                               ? "text-sm text-red-700"
                               : "text-sm text-green-700"
                           }
                         >
-                          {p.performance}
+                          {percentageFormatter.format(+p.performance)}
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="bg-indigo-500 px-2 py-2 text-white text-center font-extrabold rounded-full">
+                          <Link href={"/portfolio/" + p.id}>
+                            <a>View</a>
+                          </Link>
+                        </span>
                       </td>
                     </tr>
                   ))}

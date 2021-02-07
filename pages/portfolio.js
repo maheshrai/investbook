@@ -2,6 +2,7 @@ import { withAuthenticator } from "@aws-amplify/ui-react";
 import { API, Auth } from "aws-amplify";
 import { useState, useEffect } from "react";
 import { portfoliosByUsername, getPortfolio } from "../graphql/queries";
+import { PortfolioView } from "../components/PortfolioView";
 import {
   createTransaction,
   createHolding,
@@ -25,7 +26,6 @@ function Portfolio() {
 
   const [user, setUser] = useState(null);
   const [portfolio, setPortfolio] = useState(null);
-  const [holdings, setHoldings] = useState([]);
   const [exists, setExists] = useState(true);
   const [transaction, setTransaction] = useState("BUY");
   const [quantity, setQuantity] = useState(0);
@@ -115,11 +115,16 @@ function Portfolio() {
           arr[i]["gainPct"] = +gainPct;
         }
         tmpPortfolio["value"] = +tmpPortfolio.availableFunds + holdingsValue;
+        tmpPortfolio["performance"] = (
+          (+tmpPortfolio["value"] - 50000) /
+          50000
+        ).toFixed(4);
+
         setPortfolio(tmpPortfolio);
-        setHoldings(arr);
       } else {
         // The portfolio has no holdings. Set the value to available funds
         tmpPortfolio["value"] = +tmpPortfolio.availableFunds;
+        tmpPortfolio["performance"] = 0;
         setPortfolio(tmpPortfolio);
       }
     } else {
@@ -151,6 +156,7 @@ function Portfolio() {
   function isTransactionValid() {
     if (isNaN(price) || isNaN(quantity) || price === 0 || quantity === 0)
       return false;
+    const holdings = portfolio?.Holdings?.items;
     let holding = holdings.find((h) => h.symbol === symbol);
     try {
       if (transaction === "BUY") {
@@ -185,7 +191,7 @@ function Portfolio() {
       cost: cost,
       portfolioID: portfolio.id,
     };
-    let holding = holdings.find((h) => h.symbol === symbol);
+    let holding = portfolio.Holdings.items.find((h) => h.symbol === symbol);
     if (holding) {
       // update the holding
       let hqty = parseFloat(holding.quantity);
@@ -274,146 +280,8 @@ function Portfolio() {
       </div>
 
       <div className={!exists ? "hidden" : "flex flex-col"}>
-        {portfolio && (
-          <p className="pb-4 text-lg text-black font-semibold">
-            {portfolio?.name}
-          </p>
-        )}
-        {portfolio && (
-          <p className="pb-4 text-md font-semibold">
-            <div>
-              <span className="text-black">Portfolio Value ($50,000): </span>
-              <span
-                className={
-                  portfolio?.value >= 50000 ? "text-green-500" : "text-red-500"
-                }
-              >
-                {currencyFormatter.format(portfolio?.value)}
-              </span>
-            </div>
-            <div>
-              <span className="text-black">Funds available to invest: </span>
-              <span className="text-blue-500">
-                {currencyFormatter.format(portfolio?.availableFunds)}
-              </span>
-            </div>
-          </p>
-        )}
-        {holdings?.length > 0 && (
-          <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-              <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-                <table className="table-auto min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        SYM
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        QTY
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Price
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Cost
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Value
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Gain
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Gain(%)
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {holdings.map((holding, index) => (
-                      <tr>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {holding?.symbol}
-                          </div>
-                          <div className="text-xs text-gray-900">
-                            {holding?.companyName}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {holding?.quantity}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {currencyFormatter.format(holding?.price)}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {currencyFormatter.format(holding?.cost)}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {currencyFormatter.format(holding?.value)}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div
-                            className={
-                              holding?.gain < 0
-                                ? "text-sm text-red-700"
-                                : "text-sm text-green-700"
-                            }
-                          >
-                            {currencyFormatter.format(holding?.gain)}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div
-                            className={
-                              +holding?.gain < 0
-                                ? "text-sm text-red-700"
-                                : "text-sm text-green-700"
-                            }
-                          >
-                            {percentageFormatter.format(holding?.gainPct)}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-        {invalidTransaction && (
-          <p className="py-4 text-md font-semibold">Error</p>
-        )}
+        <PortfolioView portfolio={portfolio} />
+
         <div className="py-4 grid grid-cols-3 gap-4 md:grid-cols-6">
           <select
             onChange={handleTransactionChange}
