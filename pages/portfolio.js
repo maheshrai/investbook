@@ -1,7 +1,7 @@
 import { withAuthenticator } from "@aws-amplify/ui-react";
 import { API, Auth } from "aws-amplify";
 import { useState, useEffect } from "react";
-import { portfoliosByUsername, listHoldings } from "../graphql/queries";
+import { portfoliosByUsername, getPortfolio } from "../graphql/queries";
 import {
   createTransaction,
   createHolding,
@@ -31,6 +31,7 @@ function Portfolio() {
   const [quantity, setQuantity] = useState(0);
   const [price, setPrice] = useState(0);
   const [symbol, setSymbol] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [portfolioName, setPortfolioName] = useState("");
   const [invalidTransaction, setInvalidTransaction] = useState(false);
 
@@ -57,9 +58,12 @@ function Portfolio() {
   }
 
   async function updatePrice(symbol) {
-    let p = await fetchQuote(symbol);
-    if (p && !isNaN(p)) p = p.toFixed(2);
-    setPrice(p);
+    let q = await fetchQuote(symbol);
+    if (q && q.price && !isNaN(q.price)) {
+      let p = q.price.toFixed(2);
+      setPrice(p);
+      setCompanyName(q.companyName);
+    }
   }
 
   async function fetchQuote(symbol) {
@@ -71,9 +75,9 @@ function Portfolio() {
           process.env.NEXT_PUBLIC_IEX_CLOUD_API_KEY
       );
       const quote = await res.json();
-      return quote?.latestPrice;
+      return { price: quote?.latestPrice, companyName: quote?.companyName };
     } catch (ex) {}
-    return NaN;
+    return null;
   }
 
   async function fetchPortfolio() {
@@ -86,35 +90,36 @@ function Portfolio() {
       portfolioData.data.portfoliosByUsername.items &&
       portfolioData.data.portfoliosByUsername.items.length > 0
     ) {
-      const tmpPortfolio = portfolioData.data.portfoliosByUsername.items[0];
-      const holdingsData = await API.graphql({
-        query: listHoldings,
-        filter: {
-          portfolioID: { eq: portfolio?.id },
-        },
+      const pfd = portfolioData.data.portfoliosByUsername.items[0];
+      let id = pfd?.id;
+      const pf = await API.graphql({
+        query: getPortfolio,
+        variables: { id },
       });
+
+      let tmpPortfolio = pf.data?.getPortfolio;
       let holdingsValue = 0;
-      if (holdingsData.data.listHoldings.items.length > 0) {
-        let arr = holdingsData.data.listHoldings.items;
+      if (tmpPortfolio.Holdings.items.length > 0) {
+        let arr = tmpPortfolio.Holdings.items;
         for (var i = 0; i < arr.length; i++) {
-          let p = await fetchQuote(arr[i].symbol);
-          if (p && !isNaN(p)) p = p.toFixed(2);
-          else continue;
-          arr[i]["price"] = p;
-          const val = p * arr[i].quantity;
-          holdingsValue += val;
+          let q = await fetchQuote(arr[i].symbol);
+          if (!q || !q.price || isNaN(q.price)) continue;
+          let p = q.price.toFixed(2);
+          arr[i]["price"] = +p;
+          const val = (+p * +arr[i].quantity).toFixed(2);
+          holdingsValue += +val;
           arr[i]["value"] = val;
-          let gain = val - arr[i].cost;
-          let gainPct = gain / arr[i].cost;
-          arr[i]["gain"] = gain;
-          arr[i]["gainPct"] = gainPct;
+          let gain = (val - arr[i].cost).toFixed(2);
+          let gainPct = +gain / arr[i].cost;
+          arr[i]["gain"] = +gain;
+          arr[i]["gainPct"] = +gainPct;
         }
-        tmpPortfolio["value"] = tmpPortfolio.availableFunds + holdingsValue;
+        tmpPortfolio["value"] = +tmpPortfolio.availableFunds + holdingsValue;
         setPortfolio(tmpPortfolio);
         setHoldings(arr);
       } else {
         // The portfolio has no holdings. Set the value to available funds
-        tmpPortfolio["value"] = tmpPortfolio.availableFunds;
+        tmpPortfolio["value"] = +tmpPortfolio.availableFunds;
         setPortfolio(tmpPortfolio);
       }
     } else {
@@ -175,6 +180,7 @@ function Portfolio() {
     };
     const h = {
       symbol: symbol,
+      companyName: companyName,
       quantity: qty,
       cost: cost,
       portfolioID: portfolio.id,
@@ -197,9 +203,11 @@ function Portfolio() {
         // update the holding
         const holdingDetails = {
           id: holding.id,
-          quantity: transaction === "BUY" ? hqty + qty : hqty - qty,
+          quantity: transaction === "BUY" ? +hqty + +qty : +hqty - +qty,
           cost:
-            transaction === "BUY" ? holding.cost + cost : holding.cost - cost,
+            transaction === "BUY"
+              ? (+holding.cost + +cost).toFixed(2)
+              : (+holding.cost - +cost).toFixed(2),
         };
         await API.graphql({
           query: updateHolding,
@@ -225,8 +233,8 @@ function Portfolio() {
       id: portfolio.id,
       availableFunds:
         transaction === "BUY"
-          ? portfolio.availableFunds - cost
-          : portfolio.availableFunds + cost,
+          ? (+portfolio.availableFunds - +cost).toFixed(2)
+          : (+portfolio.availableFunds + +cost).toFixed(2),
     };
     await API.graphql({
       query: updatePortfolio,
@@ -285,11 +293,7 @@ function Portfolio() {
             </div>
             <div>
               <span className="text-black">Funds available to invest: </span>
-              <span
-                className={
-                  portfolio?.value >= 50000 ? "text-green-500" : "text-red-500"
-                }
-              >
+              <span className="text-blue-500">
                 {currencyFormatter.format(portfolio?.availableFunds)}
               </span>
             </div>
@@ -353,6 +357,9 @@ function Portfolio() {
                           <div className="text-sm text-gray-900">
                             {holding?.symbol}
                           </div>
+                          <div className="text-xs text-gray-900">
+                            {holding?.companyName}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
@@ -388,7 +395,7 @@ function Portfolio() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div
                             className={
-                              holding?.gain < 0
+                              +holding?.gain < 0
                                 ? "text-sm text-red-700"
                                 : "text-sm text-green-700"
                             }
@@ -439,7 +446,7 @@ function Portfolio() {
           <div className="bg-indigo-500 px-6 py-3 text-white text-center font-extrabold rounded-full">
             {isNaN(price) || isNaN(quantity) || price === 0 || quantity === 0
               ? "Cost"
-              : price * quantity}
+              : (price * quantity).toFixed(2)}
           </div>
           <button
             onClick={async () => updateMyPortfolio()}
